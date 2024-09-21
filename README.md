@@ -1,1 +1,1 @@
-# 117
+# Fresno State 117 Course
