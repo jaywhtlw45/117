@@ -13,17 +13,12 @@
 using namespace std;
 
 int Exp(), Term(), Exp2(int), Term2(int), Fact(), Power(), Power2(int);
+void Declarations(), Declaration(string), Statements(), Statement(string), print_st(), assign_st(string);
+
+// helper funcitons
+void loadProgram(), startProgram(), printSymbolTable();
 string readWord();
-void loadProgram();
-void startProgram();
-void Declarations();
-void Declaration(string);
-void Statements();
-void Statement(string);
-void print_st();
-void printSymbolTable();
 int findSymbolById(char);
-void assign_st(string);
 
 string prog;    // string for reading 1-line input expression (program)
 int indexx = 0; // global indexx for program string
@@ -39,7 +34,6 @@ int main(int argc, const char **argv)
 {
     loadProgram();
     startProgram();
-    cout << endl;
     printSymbolTable();
     return 0;
 }
@@ -60,7 +54,8 @@ void loadProgram()
     {
         prog += ch;
     }
-    cout << prog << endl << endl;
+    cout << prog << endl
+         << endl;
 }
 
 void startProgram()
@@ -81,16 +76,24 @@ void startProgram()
 string readWord()
 {
     string word = "";
-    while (isspace(prog[indexx]))
+    while (isspace(prog[indexx])) // remove leading whitespace
         indexx++;
 
-    while (!isspace(prog[indexx]) && prog[indexx] != '\0')
+    if (prog[indexx] == ';') // special case: semicolon
     {
-        word += prog[indexx];
+        word = prog[indexx];
         indexx++;
     }
+    else
+    {
+        while (!isspace(prog[indexx]) && prog[indexx] != '\0' && prog[indexx] != ';')
+        {
+            word += prog[indexx];
+            indexx++;
+        }
+    }
 
-    while (isspace(prog[indexx]))
+    while (isspace(prog[indexx])) // remove trailing white space
         indexx++;
 
     return word;
@@ -126,49 +129,37 @@ void Statement(string word)
     return;
 }
 
-// void assign_st(string id)
-// {
-//     string word = readWord();
-//     if (word.length() == 1 && word[0] == '=')
-//     {
-//         int value = Exp();
-//         int position = findSymbolById(id[0]);
-
-//         if(position >= 0)
-//         {
-//             symbol_table[position].val = value;
-//         }
-//         else
-//         {
-//             cerr << "assign_st Error: symbol not found" << endl;
-//             exit(1);
-//         }
-//     }
-//     else
-//     {
-//         cerr << "assign_st Error: equal operator not found" << endl;
-//         exit(1);
-//     }
-
-//     word = readWord();
-//     if (word.length()!=1 && word[0] != ';')
-//     {
-//         cerr << "assign_st Error: semicolon not found" << endl;
-//         exit(1);
-//     }
-
-//     return;
-// }
-
-void assign_st(string id)
+// id = exp || id = id
+void assign_st(string leftSide)
 {
     string word = readWord();
-    if (word.length() == 1 && word[0] == '=')
+    if (word.length() != 1 || word[0] != '=')
+    {
+        cerr << "assign_st Error: equal operator not found" << endl;
+        exit(1);
+    }
+
+    string rightSide = "";
+    rightSide += prog[indexx];
+    if (isalpha(rightSide[0])) // right side is an id
+    {
+        word = readWord();
+        if (word.length() != 1)
+        {
+            cerr << "assign_st Error: symbol length greater rthan 1" << endl;
+            exit(1);
+        }
+
+        int leftPosition = findSymbolById(leftSide[0]);
+        int rightPosition = findSymbolById(rightSide[0]);
+        symbol_table[leftPosition].val = symbol_table[rightPosition].val;
+    }
+    else // right side is an expression
     {
         int value = Exp();
-        int position = findSymbolById(id[0]);
+        int position = findSymbolById(leftSide[0]);
 
-        if(position >= 0)
+        if (position >= 0)
         {
             symbol_table[position].val = value;
         }
@@ -178,14 +169,9 @@ void assign_st(string id)
             exit(1);
         }
     }
-    else
-    {
-        cerr << "assign_st Error: equal operator not found" << endl;
-        exit(1);
-    }
 
-    word = readWord();
-    if (word.length()!=1 && word[0] != ';')
+    string semicolon = readWord();
+    if (semicolon[0] != ';')
     {
         cerr << "assign_st Error: semicolon not found" << endl;
         exit(1);
@@ -214,20 +200,20 @@ void print_st()
     else
     {
         cout << Exp() << endl;
-    }  
+    }
 
     string word = readWord();
-    if (word.length() != 1 && word[0] != ';')
+    if (word[0] != ';')
     {
         cerr << "print_st Error: no semicolon found" << endl;
         exit(1);
-    } 
-    
+    }
 
     return;
 }
 
-int findSymbolById(char id) {
+int findSymbolById(char id)
+{
     for (int i = 0; i < symbol_table.size(); i++)
     {
         if (symbol_table[i].id == id)
@@ -302,11 +288,8 @@ void Declaration(string type)
             break;
     }
 
-    // if the semicolon was appended to the id
-    if (id.length() == 2 && id[1] == ';')
-        return;
-
-    if (prog[indexx] != ';')
+    string semicolon = readWord();
+    if (semicolon[0] != ';')
     {
         cerr << "Declaration Error: No semicolon found" << endl;
         exit(1);
@@ -388,12 +371,12 @@ int Power2(int inp)
 int Fact()
 {
     char a = prog[indexx]; // get one char from program string
-    
+
     if (a == '(')
     {
         indexx++;
         int result = Exp(); // evaluate expression
-        
+
         if (prog[indexx] != ')')
         {
             cerr << "parentheses don't match" << endl;
@@ -409,20 +392,5 @@ int Fact()
         num = num * 10 + (prog[indexx] - '0');
         indexx++;
     }
-    cout << (num) << endl;
     return num;
 }
-
-// do
-// {
-//     id = readWord();
-//     if (id.length() > 2 || id.length() < 1 || !isalpha(id[0]))
-//     {
-//         cerr << "Declaration Error: id is not valid" << endl;
-//         exit(1);
-//     }
-//     symbol newSymbol;
-//     newSymbol.id = id[0];
-//     newSymbol.type = type;
-//     symbol_table.push_back(newSymbol);
-// } while (id.length()== 2 && id[1] == ',');
