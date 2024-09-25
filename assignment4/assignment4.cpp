@@ -304,8 +304,8 @@ void Declaration(string type)
 
 char readChar()
 {
-    char a = prog.at(indexx++);                // get one char from program string
-    while (a == ' ' && indexx < prog.length()) 
+    char a = prog.at(indexx++); // get one char from program string
+    while (a == ' ' && indexx < prog.length())
         a = prog.at(indexx++);
 
     return a;
@@ -367,8 +367,6 @@ int Power()
     return Power2(Fact());
 }
 
-
-
 // helper function for power
 int Power2(int inp)
 {
@@ -387,8 +385,8 @@ int Power2(int inp)
 
 int Fact()
 {
-    char a = prog[indexx];                     // get one char from program string
-    while (a == ' ' && indexx < prog.length()) //!!
+    char a = prog[indexx]; // get one char from program string
+    while (a == ' ' && indexx < prog.length())
     {
         indexx++;
         a = prog[indexx];
