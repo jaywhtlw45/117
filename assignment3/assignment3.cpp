@@ -3,40 +3,47 @@
 // compile: $> g++ prog1.cpp
 // run with: 2+3*4/2+3+4*2 or (3+2)*2^3
 
-#include <cstdlib> 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <cmath> 
+#include <cmath>
 using namespace std;
 
 int Exp(), Term(), Exp2(int), Term2(int), Fact(), Power(), Power2(int);
 string prog;    // string for reading 1-line input expression (program)
 int indexx = 0; // global index for program string
 
+bool flag = true;
+
 int main(int argc, const char **argv)
 {
-    // Open file
-    ifstream inputFile("input.txt");
-    if (!inputFile)
-    {
-        cerr << "Error opening input file!" << endl;
-        return 1;
-    }
+    // // Open file
+    // ifstream inputFile("input2.txt");
+    // if (!inputFile)
+    // {
+    //     cerr << "Error opening input file!" << endl;
+    //     return 1;
+    // }
 
-    // Read input from file
-    char ch;
-    while (inputFile.get(ch))
-    {
-        if (!isspace(ch) && ch != '\n')
-            prog += ch;
-        if (ch == '\n')
-        {
-            int result = Exp();
-            cout << "result=" << result << endl;
-        }
-    }
-    int result = Exp();
-    cout << "result= " << result << endl;
+    // // Read input from file
+    // char ch;
+    // while (inputFile.get(ch))
+    // {
+    //     if (!isspace(ch) && ch != '\n')
+    //         prog += ch;
+    //     if (ch == '\n')
+    //     {
+    //         int result = Exp();
+    //         cout << "result=" << result << endl;
+    //     }
+    // }
+    // int result = Exp();
+    // cout << "result= " << result << endl;
+
+    prog = "   (2  +31)*4/2-(3*(4-11))+2^2^2+1  ";
+    cout << endl
+         << Exp() << endl;
+    return 0;
 }
 
 // handles addition and subtraction
@@ -57,7 +64,10 @@ int Exp2(int inp)
     int result = inp;
     if (indexx < prog.length()) // if not the end of program string
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = prog.at(indexx++);                // get one char from program string
+        while (a == ' ' && indexx < prog.length()) //!!
+            a = prog.at(indexx++);
+
         if (a == '+')
             result = Exp2(result + Term()); // handles T+T
         else if (a == '-')
@@ -74,7 +84,10 @@ int Term2(int inp)
     int result = inp;
     if (indexx < prog.length())
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = prog.at(indexx++);                // get one char from program string
+        while (a == ' ' && indexx < prog.length()) //!!
+            a = prog.at(indexx++);
+
         if (a == '*')
             result = Term2(result * Power()); // handles consecutive * operators
         else if (a == '/')
@@ -99,7 +112,10 @@ int Power2(int inp)
     int result = inp;
     if (indexx < prog.length())
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = prog.at(indexx++);                // get one char from program string
+        while (a == ' ' && indexx < prog.length()) //!!
+            a = prog.at(indexx++);
+
         if (a == '^')
             result = pow(result, Power()); // handles result ^
         else
@@ -108,22 +124,34 @@ int Power2(int inp)
     return result;
 }
 
-// handles number and parentheses
 int Fact()
 {
-    char a = prog.at(indexx++); // get one char from program string
+    char a = prog[indexx];                     // get one char from program string
+    while (a == ' ' && indexx < prog.length()) //!!
+    {
+        indexx++;
+        a = prog[indexx];
+    }
+
     if (a == '(')
     {
+        indexx++;
         int result = Exp(); // evaluate expression
-        if (prog.at(indexx++) != ')')
+
+        if (prog[indexx] != ')')
         {
             cerr << "parentheses don't match" << endl;
             exit(1);
         }
+        indexx++;
         return result;
     }
-    else
+
+    int num = 0;
+    while (isdigit(prog[indexx]))
     {
-        return a - '0';
+        num = num * 10 + (prog[indexx] - '0');
+        indexx++;
     }
+    return num;
 }

@@ -41,7 +41,7 @@ int main(int argc, const char **argv)
 void loadProgram()
 {
     // Open file
-    ifstream inputFile("input2.txt");
+    ifstream inputFile("input.txt");
     if (!inputFile)
     {
         cerr << "Error opening input file!" << endl;
@@ -54,12 +54,14 @@ void loadProgram()
     {
         prog += ch;
     }
-    cout << prog << endl
+    cout << endl
+         << prog << endl
          << endl;
 }
 
 void startProgram()
 {
+    cout << "---PROGRAM OUTPUT---" << endl;
     string word = readWord();
     if (word == "program")
     {
@@ -224,6 +226,8 @@ int findSymbolById(char id)
 
 void printSymbolTable()
 {
+    cout << endl
+         << "---SYMBOL TABLE---" << endl;
     cout << "i\t" << "id\t" << "type\t" << "value" << endl;
     for (int i = 0; i < symbol_table.size(); i++)
     {
@@ -298,6 +302,15 @@ void Declaration(string type)
     return;
 }
 
+char readChar()
+{
+    char a = prog.at(indexx++);                // get one char from program string
+    while (a == ' ' && indexx < prog.length()) 
+        a = prog.at(indexx++);
+
+    return a;
+}
+
 // handles addition and subtraction
 int Exp()
 {
@@ -316,7 +329,8 @@ int Exp2(int inp)
     int result = inp;
     if (indexx < prog.length()) // if not the end of program string
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = readChar();
+
         if (a == '+')
             result = Exp2(result + Term()); // handles T+T
         else if (a == '-')
@@ -333,7 +347,8 @@ int Term2(int inp)
     int result = inp;
     if (indexx < prog.length())
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = readChar();
+
         if (a == '*')
             result = Term2(result * Power()); // handles consecutive * operators
         else if (a == '/')
@@ -352,13 +367,16 @@ int Power()
     return Power2(Fact());
 }
 
+
+
 // helper function for power
 int Power2(int inp)
 {
     int result = inp;
     if (indexx < prog.length())
     {
-        char a = prog.at(indexx++); // get one char from program string
+        char a = readChar();
+
         if (a == '^')
             result = pow(result, Power()); // handles result ^
         else
@@ -367,10 +385,14 @@ int Power2(int inp)
     return result;
 }
 
-// handles number and parentheses
 int Fact()
 {
-    char a = prog[indexx]; // get one char from program string
+    char a = prog[indexx];                     // get one char from program string
+    while (a == ' ' && indexx < prog.length()) //!!
+    {
+        indexx++;
+        a = prog[indexx];
+    }
 
     if (a == '(')
     {

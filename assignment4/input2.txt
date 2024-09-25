@@ -2,7 +2,7 @@ program
         int a, b, c; 
         double d; 
         begin 
-            a = 2*(55+200); 
+            a = 2*( 55+200); 
             b = (31+4)*50; 
             c = a; 
             print a; 
