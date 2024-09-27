@@ -1,0 +1,7 @@
+program 
+        int a, b, c; 
+        double d; 
+        begin 
+            a = 5;
+            z = a; 
+        end

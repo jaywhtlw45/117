@@ -1,6 +1,8 @@
+//! program is stored in "input.txt". path can be changed in main
+
 // Interpreter for simplified infix expression with {+, -, *, /, ^ } operations;
 // Keyboard input, single digit numbers only and no spaces are allowed;
-// compile: $> g++ prog1.cpp
+// compile: $> g++ assignment4.cpp
 // run with: 2+3*4/2+3+4*2 or (3+2)*2^3
 
 #include <cstdlib>
@@ -16,7 +18,7 @@ int Exp(), Term(), Exp2(int), Term2(int), Fact(), Power(), Power2(int);
 void Declarations(), Declaration(string), Statements(), Statement(string), print_st(), assign_st(string);
 
 // helper funcitons
-void loadProgram(), startProgram(), printSymbolTable();
+void loadProgram(string), startProgram(), printSymbolTable();
 string readWord();
 int findSymbolById(char);
 
@@ -32,16 +34,18 @@ vector<symbol> symbol_table; // stores all symbols
 
 int main(int argc, const char **argv)
 {
-    loadProgram();
+    string path = "input.txt";
+
+    loadProgram(path);
     startProgram();
     printSymbolTable();
     return 0;
 }
 
-void loadProgram()
+void loadProgram(string path)
 {
     // Open file
-    ifstream inputFile("input.txt");
+    ifstream inputFile(path);
     if (!inputFile)
     {
         cerr << "Error opening input file!" << endl;
@@ -75,20 +79,24 @@ void startProgram()
     }
 }
 
+// read word will read the next word of the program
+// for example, "print", "a", and ";" are words
+// "print;" is considered two words, "print" and ";"
 string readWord()
 {
     string word = "";
     while (isspace(prog[indexx])) // remove leading whitespace
         indexx++;
 
-    if (prog[indexx] == ';') // special case: semicolon
+    // special case: semicolon
+    if (prog[indexx] == ';' || prog[indexx] == ',')
     {
         word = prog[indexx];
         indexx++;
     }
-    else
+    else // read word
     {
-        while (!isspace(prog[indexx]) && prog[indexx] != '\0' && prog[indexx] != ';')
+        while (!isspace(prog[indexx]) && prog[indexx] != '\0' && prog[indexx] != ';' && prog[indexx] != ',')
         {
             word += prog[indexx];
             indexx++;
@@ -101,6 +109,7 @@ string readWord()
     return word;
 }
 
+// read a list of statements
 void Statements()
 {
     string word = readWord();
@@ -113,6 +122,7 @@ void Statements()
     return;
 }
 
+// read an individual statement
 void Statement(string word)
 {
     if (word == "print")
@@ -131,7 +141,7 @@ void Statement(string word)
     return;
 }
 
-// id = exp || id = id
+// process an assignment statement
 void assign_st(string leftSide)
 {
     string word = readWord();
@@ -154,6 +164,13 @@ void assign_st(string leftSide)
 
         int leftPosition = findSymbolById(leftSide[0]);
         int rightPosition = findSymbolById(rightSide[0]);
+
+        if (leftPosition == -1 || rightPosition == -1)
+        {
+            cerr << "assign_st Error: symbol not found" << endl;
+            exit(1);
+        }
+
         symbol_table[leftPosition].val = symbol_table[rightPosition].val;
     }
     else // right side is an expression
@@ -182,6 +199,7 @@ void assign_st(string leftSide)
     return;
 }
 
+// print statement
 void print_st()
 {
     char id = prog[indexx];
@@ -189,7 +207,7 @@ void print_st()
     {
         indexx++;
         int position = findSymbolById(id);
-        if (position >= 0)
+        if (position > -1)
         {
             cout << symbol_table[position].val << endl;
         }
@@ -275,7 +293,7 @@ void Declaration(string type)
     while (true)
     {
         id = readWord();
-        if (id.length() > 2 || id.length() < 1 || !isalpha(id[0]))
+        if (id.length() != 1 || !isalpha(id[0]))
         {
             cerr << "Declaration Error: id is not valid" << endl;
             exit(1);
@@ -286,19 +304,17 @@ void Declaration(string type)
         newSymbol.type = type;
         symbol_table.push_back(newSymbol);
 
-        if (id.length() == 2 && id[1] == ',')
+        id = readWord();
+        if (id == ",")
             continue;
         else
             break;
     }
-
-    string semicolon = readWord();
-    if (semicolon[0] != ';')
+    if (id != ";")
     {
         cerr << "Declaration Error: No semicolon found" << endl;
         exit(1);
     }
-
     return;
 }
 

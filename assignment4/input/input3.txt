@@ -1,9 +1,12 @@
 program 
-        int a, b, c; 
+        int a, b, c, d; 
         double d; 
         begin 
             a = 2*( 55+200); 
-            b = (31+4)*50; 
+            b = (31+4)*50;
+            d = 5 + 2*7^3
+            c = b;
+            print c; 
             c = a; 
             print a; 
             print b; 

@@ -1,0 +1,7 @@
+program
+        int a,b,c; 
+        double d; 
+        begin
+            d = 5 + 2*7^3;
+            print d;
+        end
