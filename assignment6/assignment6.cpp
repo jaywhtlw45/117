@@ -1,7 +1,7 @@
 // Jason Whitlow
 // This program reads a list of id's and DNA sequences from input.txt.
 // All matching DNA strings are stored in an unordered map.
-// The map is then copied to output.txt
+// The map is then formated and copied to output.txt
 
 #include <iostream>
 #include <fstream>
@@ -11,10 +11,9 @@
 #include <vector>
 
 using namespace std;
-
 unordered_map<string, vector<int>> dna_map;
 
-// loads input file into an ordered map
+// loads input file into an unordered map
 void load_input_file(const string &file_name)
 {
     fstream file(file_name, ios::in);
@@ -34,12 +33,11 @@ void load_input_file(const string &file_name)
         }
         dna_map[key].push_back(stoi(value));
     }
-
     file.close();
 }
 
-// copys the ordered map into an output file
-void save_to_output_file(const unordered_map<string, vector<int>> &map, string output_file_name)
+// formats and copys the ordered map to the output file
+void save_to_output_file(string output_file_name)
 {
     ofstream output_file(output_file_name);
     if (!output_file.is_open())
@@ -47,14 +45,27 @@ void save_to_output_file(const unordered_map<string, vector<int>> &map, string o
         cerr << "Error opening output file: " << output_file_name << endl;
     }
 
-    for (const auto &pair : map)
+    // add each pair to the output file
+    for (const auto &pair : dna_map)    
     {
-        for (const auto &val : pair.second)
+        if (pair.second.size() == 1)
         {
-            output_file << val << ", ";
+            output_file << pair.second[0] << endl;
+            output_file << pair.first << endl;
         }
-        output_file << endl;
-        output_file << pair.first << endl;
+        else
+        {
+            char suffix = 'a';
+            for (size_t i = 0; i < pair.second.size(); ++i)
+            {
+                output_file << pair.second[i] << suffix;
+                if (i < pair.second.size() - 1) 
+                    output_file << ", ";
+                suffix++;
+            }
+            output_file << endl;
+            output_file << pair.first << endl;
+        }
     }
     output_file.close();
 }
@@ -65,7 +76,7 @@ int main()
     string output_file_name = "output.txt";
 
     load_input_file(file_name);
-    save_to_output_file(dna_map, output_file_name);
+    save_to_output_file(output_file_name);
 
     return 0;
 }
